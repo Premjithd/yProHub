@@ -95,8 +95,8 @@ Swagger UI: `https://localhost:7042/swagger`
 **Migrations**: Auto-applied on startup via `context.Database.MigrateAsync()`. Key migrations: `InitialCreate`, `AddUserTypeAndVerificationCodes`, `AddJobTable`, `AddAddressFieldsToUser/Pro`, `AddServiceCategoryTable`, `AddRevokedTokens`.
 
 **Key directories**:
-- `Controllers/` — Auth, Users, Pros, Jobs, Messages, Payments, Materials, Services, Admin, Verification, Address
-- `Models/` — EF entities (User, Pro, Job, JobBid, Service, Message, Payment, RevokedToken, etc.)
+- `Controllers/` — Auth, Users, Pros, Jobs, JobCompletion, JobInsurance, Notifications, Messages, Payments, Materials, Services, Admin, Verification, Address
+- `Models/` — EF entities (User, Pro, Job, JobBid, JobCompletion, JobInsurance, JobNotification, Service, Message, Payment, RevokedToken, etc.)
 - `DTOs/` — request/response shapes
 - `Services/` — business logic, JwtService, TokenBlacklistService, VerificationService, RateSplitService, SeedDataService
 
