@@ -1,0 +1,122 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+yProHub is a professional services marketplace with two main components:
+- **prohub-ui**: Angular 20 frontend application
+- **ProHubAPI/ServiceProviderAPI**: ASP.NET Core 8 backend API
+
+The system connects users who post jobs with professionals (pros) who offer services, featuring authentication, verification, job bidding, messaging, and payment integration (Razorpay).
+
+## Frontend (prohub-ui)
+
+### Technology Stack
+- **Framework**: Angular 20.2.x (standalone components and modules)
+- **Language**: TypeScript 5.9 (strict mode enabled)
+- **Styling**: SCSS with Angular Material Design
+- **Authentication**: JWT-based with Azure MSAL (Microsoft authentication) support
+- **Testing**: Karma/Jasmine with Chrome launcher
+- **Build**: Angular CLI 20.2.2
+
+### Commands
+
+```bash
+cd prohub-ui
+
+npm install           # Install dependencies
+npm start             # Dev server at http://localhost:4200
+npm run build         # Production build
+npm run watch         # Watch mode (rebuilds on changes)
+npm test              # Run unit tests
+ng test --code-coverage
+```
+
+### Architecture
+
+**Routing**: The app uses a `MainLayout` wrapper for all authenticated routes. `accept-admin-invite` is outside the layout for public access. Most features lazy-load via `loadChildren`; root features use `loadComponent`.
+
+**Auth**: Supports JWT and Azure MSAL. Auth state managed by `AuthService`; tokens stored in localStorage. HTTP interceptors attach JWT to all API requests.
+
+**Forms**: Mix of template-driven and reactive forms with Angular Material inputs. Address autofill via backend proxy to Nominatim API.
+
+**Key directories**:
+- `src/app/auth/` — login, registration, verification flows
+- `src/app/core/` — singleton services, guards, interceptors, shared models
+- `src/app/features/` — lazy-loaded feature modules (home, profile, post-job, messages, payments, admin, etc.)
+- `src/app/layout/` — main layout, navbar, footer, sidebar
+- `src/app/services/` — job, material, payment services
+- `src/environments/` — API URL config (dev: `http://localhost:5001/api`)
+
+## Backend (ProHubAPI/ServiceProviderAPI)
+
+### Technology Stack
+- **Framework**: ASP.NET Core 8
+- **Language**: C# 13 with nullable reference types and implicit usings
+- **Database**: SQL Server + Entity Framework Core 8
+- **Authentication**: JWT Bearer tokens
+- **Payments**: Razorpay
+- **SMS**: Msg91; **Email**: SMTP
+
+### Commands
+
+```bash
+cd ProHubAPI/ServiceProviderAPI
+
+dotnet restore
+dotnet run                              # Dev server at https://localhost:7001
+dotnet watch run                        # Watch mode
+dotnet build --configuration Release
+dotnet ef database update               # Apply pending migrations
+dotnet ef migrations add MigrationName  # Add new migration
+dotnet test
+```
+
+Swagger UI: `https://localhost:7001/swagger`
+
+### Architecture
+
+**Layered**: Controllers → Services → EF Core DbContext (`ApplicationDbContext`)
+
+**Plugin abstractions** in `Services/Abstractions/`:
+- `IPaymentProvider` — Razorpay implementation provided
+- `INotificationChannel` — SMTP and Msg91 implementations
+- `IInsuranceProvider`, `IFileStorageService` — placeholders for future
+
+**Verification**: 6-digit codes with 15-min expiration; separate flows for Users and Professionals. Codes marked used after verification.
+
+**Messaging**: `MessageIndex` tracks user-pair conversations; `Message` entities link to index.
+
+**Migrations**: Auto-applied on startup. Key migrations: `InitialCreate`, `AddUserTypeAndVerificationCodes`, `AddJobTable`, `AddAddressFieldsToUser/Pro`, `AddServiceCategoryTable`.
+
+**Key directories**:
+- `Controllers/` — Auth, Users, Pros, Jobs, Messages, Payments, Materials, Services, Admin, Verification, Address
+- `Models/` — EF entities (User, Pro, Job, JobBid, Service, Message, Payment, etc.)
+- `DTOs/` — request/response shapes
+- `Services/` — business logic, JwtService, VerificationService, RateSplitService, SeedDataService
+
+### Configuration
+
+`appsettings.Development.json` overrides for local dev. Key sections in `appsettings.json`:
+```json
+{
+  "ConnectionStrings": { "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ServiceProviderDB;..." },
+  "Jwt": { "Key": "...", "Issuer": "https://localhost:7001", "Audience": "https://localhost:7001" },
+  "Email": { "SmtpServer": "...", "Port": 587, "Username": "...", "Password": "...", "From": "..." },
+  "Payment": { "Razorpay": { "KeyId": "...", "KeySecret": "..." } }
+}
+```
+
+## Running Both Apps Locally
+
+1. **Backend**: `cd ProHubAPI/ServiceProviderAPI && dotnet watch run` — migrations and seed data apply automatically
+2. **Frontend**: `cd prohub-ui && npm start` — configured to hit `http://localhost:5001/api` (update `environment.ts` if backend port differs)
+
+## Important Notes
+
+- **CORS**: Dev allows any origin (`AllowAnyOrigin()`). Restrict in production.
+- **JWT secret**: Change the example value in `appsettings.json` for production.
+- **Email/SMS**: Console-only in dev; configure SMTP/Msg91 for production.
+- **Address autofill**: Uses Nominatim (OpenStreetMap) via backend proxy. See `ADDRESS_AUTOFILL_GUIDE.md` for details.
+- **Razorpay**: Test keys in `appsettings.Development.json`; swap for live keys in production.
