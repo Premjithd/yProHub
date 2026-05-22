@@ -65,15 +65,17 @@ ng test --code-coverage
 cd ProHubAPI/ServiceProviderAPI
 
 dotnet restore
-dotnet run                              # Dev server at https://localhost:7001
+dotnet run                              # Dev server at https://localhost:7042
 dotnet watch run                        # Watch mode
 dotnet build --configuration Release
 dotnet ef database update               # Apply pending migrations
-dotnet ef migrations add MigrationName  # Add new migration
+dotnet ef migrations add MigrationName  # Add new migration (must build first)
 dotnet test
 ```
 
-Swagger UI: `https://localhost:7001/swagger`
+Swagger UI: `https://localhost:7042/swagger`
+
+> **Migration tip**: Always run `dotnet build` before `dotnet ef migrations add` — using `--no-build` with an outdated DLL generates empty Up/Down methods.
 
 ### Architecture
 
@@ -88,13 +90,15 @@ Swagger UI: `https://localhost:7001/swagger`
 
 **Messaging**: `MessageIndex` tracks user-pair conversations; `Message` entities link to index.
 
-**Migrations**: Auto-applied on startup. Key migrations: `InitialCreate`, `AddUserTypeAndVerificationCodes`, `AddJobTable`, `AddAddressFieldsToUser/Pro`, `AddServiceCategoryTable`.
+**Auth / Logout**: JWT tokens include a `jti` (JWT ID) claim. On logout, the `jti` is written to the `RevokedTokens` table (`ITokenBlacklistService`). An `OnTokenValidated` hook in `Program.cs` rejects any request whose token `jti` is in that table. The Angular `Auth.logoutOnServer()` calls `POST /api/auth/logout` before clearing localStorage — the client-side clear always happens even if the server call fails.
+
+**Migrations**: Auto-applied on startup via `context.Database.MigrateAsync()`. Key migrations: `InitialCreate`, `AddUserTypeAndVerificationCodes`, `AddJobTable`, `AddAddressFieldsToUser/Pro`, `AddServiceCategoryTable`, `AddRevokedTokens`.
 
 **Key directories**:
 - `Controllers/` — Auth, Users, Pros, Jobs, Messages, Payments, Materials, Services, Admin, Verification, Address
-- `Models/` — EF entities (User, Pro, Job, JobBid, Service, Message, Payment, etc.)
+- `Models/` — EF entities (User, Pro, Job, JobBid, Service, Message, Payment, RevokedToken, etc.)
 - `DTOs/` — request/response shapes
-- `Services/` — business logic, JwtService, VerificationService, RateSplitService, SeedDataService
+- `Services/` — business logic, JwtService, TokenBlacklistService, VerificationService, RateSplitService, SeedDataService
 
 ### Configuration
 
@@ -102,7 +106,7 @@ Swagger UI: `https://localhost:7001/swagger`
 ```json
 {
   "ConnectionStrings": { "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ServiceProviderDB;..." },
-  "Jwt": { "Key": "...", "Issuer": "https://localhost:7001", "Audience": "https://localhost:7001" },
+  "Jwt": { "Key": "...", "Issuer": "https://localhost:7042", "Audience": "https://localhost:7042" },
   "Email": { "SmtpServer": "...", "Port": 587, "Username": "...", "Password": "...", "From": "..." },
   "Payment": { "Razorpay": { "KeyId": "...", "KeySecret": "..." } }
 }
@@ -110,13 +114,25 @@ Swagger UI: `https://localhost:7001/swagger`
 
 ## Running Both Apps Locally
 
-1. **Backend**: `cd ProHubAPI/ServiceProviderAPI && dotnet watch run` — migrations and seed data apply automatically
-2. **Frontend**: `cd prohub-ui && npm start` — configured to hit `http://localhost:5001/api` (update `environment.ts` if backend port differs)
+1. **Backend**: `cd ProHubAPI/ServiceProviderAPI && dotnet watch run` — runs at `https://localhost:7042`; migrations and seed data apply automatically on startup
+2. **Frontend**: `cd prohub-ui && npm start` — runs at `http://localhost:4200`, configured to hit `http://localhost:5001/api` (update `src/environments/environment.ts` if backend port differs)
+
+## Frontend Architecture Notes
+
+**Design tokens**: Global CSS custom properties defined in `src/styles.scss` — use `var(--color-primary)`, `var(--text-h1)`, etc. rather than hard-coded values.
+
+**Bottom navigation**: `src/app/layout/bottom-nav/` — mobile-only (`display: none` on desktop), role-aware tabs. `--bottom-nav-height` CSS variable (60px on mobile, 0px on desktop) controls page padding.
+
+**Snackbar panels**: `.snack-info`, `.snack-success`, `.snack-error` defined globally in `styles.scss`. Pass via `panelClass` on `MatSnackBar.open()`.
+
+**Angular build budget**: `anyComponentStyle.maximumError` is set to `30kB` in `angular.json` (raised from default 20kB due to large detail-page stylesheets).
 
 ## Important Notes
 
 - **CORS**: Dev allows any origin (`AllowAnyOrigin()`). Restrict in production.
 - **JWT secret**: Change the example value in `appsettings.json` for production.
+- **JWT tokens**: Every token contains a `jti` claim. Logout revokes it server-side via the `RevokedTokens` table.
 - **Email/SMS**: Console-only in dev; configure SMTP/Msg91 for production.
 - **Address autofill**: Uses Nominatim (OpenStreetMap) via backend proxy. See `ADDRESS_AUTOFILL_GUIDE.md` for details.
 - **Razorpay**: Test keys in `appsettings.Development.json`; swap for live keys in production.
+- **Brand name**: Always "yProHub" (lowercase 'y'). The `y` prefix is intentional — never write "ProHub" or "YProHub".
