@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-yProHub is a professional services marketplace with two main components:
+yProHub is a professional services marketplace with three main components:
 - **prohub-ui**: Angular 20 frontend application
 - **ProHubAPI/ServiceProviderAPI**: ASP.NET Core 8 backend API
+- **prohub-android**: Capacitor 8 Android wrapper (packages the Angular app as an APK)
 
 The system connects users who post jobs with professionals (pros) who offer services, featuring authentication, verification, job bidding, messaging, and payment integration (Razorpay).
 
@@ -112,10 +113,65 @@ Swagger UI: `https://localhost:7042/swagger`
 }
 ```
 
+## Android (prohub-android)
+
+### Technology Stack
+- **Type**: Capacitor 8 hybrid app — Android WebView wrapper around the Angular web app
+- **App ID**: com.yprohub.android
+- **Min SDK**: 24 (Android 7.0); **Target/Compile SDK**: 36 (Android 15)
+- **Build**: Gradle 8.13.0, AGP 8.13.0, Java 21
+
+### Architecture
+The native layer is intentionally minimal — a single `MainActivity extends BridgeActivity`. All UI and business logic live in the Angular web app. Capacitor bridges native device APIs to the web layer.
+
+**No native Kotlin/Java code** beyond the empty activity shell. UI is served from `www/` (built Angular output).
+
+### UI changes and the Android app
+
+The Android app serves a **static snapshot** of the Angular build stored in `www/`. Changes to `prohub-ui` do **not** apply automatically — you must manually rebuild and sync after any UI change:
+
+```powershell
+cd prohub-android
+npm run web:sync   # rebuild Angular → copy to www/ → patch API URLs → cap sync
+```
+
+Then rebuild the APK in Android Studio. The web app (`localhost:4200`) and Android app are fully independent — the web app uses Angular's live dev server, Android uses the pre-built `www/` snapshot.
+
+### Commands
+
+```powershell
+cd prohub-android
+
+npm install                # Install Capacitor dependencies
+
+# Full build pipeline (run in order):
+npm run web:build          # Build Angular app (dev config)
+npm run web:copy           # Copy Angular dist → www/
+npm run web:patch-android-api  # Rewrite localhost URLs → 10.0.2.2:5101 for emulator
+npm run cap:sync           # Sync www/ + plugins to Android native project
+
+# Shortcut: all four steps at once
+npm run web:sync
+
+# Open in Android Studio
+npm run cap:open           # Opens android/ in Android Studio
+```
+
+### API URL Patching
+`web:patch-android-api` rewrites all occurrences of `localhost:7042` and `localhost:5001` to `10.0.2.2:5101` — the standard Android emulator address for the host machine. The backend must be running on port 5101 (or update the patch script) when testing on an emulator.
+
+### Key Files
+- `capacitor.config.json` — appId, webDir (`www/`), HTTP scheme settings
+- `android/variables.gradle` — centralized SDK/library version pins
+- `android/app/build.gradle` — app module config, dependencies
+- `android/app/src/main/java/com/yprohub/android/MainActivity.java` — empty BridgeActivity shell
+- `android/app/src/main/AndroidManifest.xml` — INTERNET permission, cleartext traffic allowed (dev)
+
 ## Running Both Apps Locally
 
 1. **Backend**: `cd ProHubAPI/ServiceProviderAPI && dotnet watch run` — runs at `https://localhost:7042`; migrations and seed data apply automatically on startup
 2. **Frontend**: `cd prohub-ui && npm start` — runs at `http://localhost:4200`, configured to hit `http://localhost:5001/api` (update `src/environments/environment.ts` if backend port differs)
+3. **Android** (emulator): ensure backend is on port 5101, then `cd prohub-android && npm run web:sync` then open in Android Studio and run on emulator
 
 ## Frontend Architecture Notes
 

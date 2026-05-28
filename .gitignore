@@ -9,6 +9,10 @@ ProHubAPI/ServiceProviderAPI/*.user
 ProHubAPI/ServiceProviderAPI/*.suo
 ProHubAPI/ServiceProviderAPI/.idea/
 
+# Secret config files — NEVER commit these
+# Copy appsettings.Production.json.example and fill in real values
+ProHubAPI/ServiceProviderAPI/appsettings.Production.json
+
 # Frontend (Angular)
 ProHubUI/prohub-ui/dist/
 ProHubUI/prohub-ui/node_modules/
