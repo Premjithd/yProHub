@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-yProHub is a professional services marketplace with three main components:
+yProHub is a professional services marketplace with four main components:
 - **prohub-ui**: Angular 20 frontend application
 - **ProHubAPI/ServiceProviderAPI**: ASP.NET Core 8 backend API
 - **prohub-android**: Capacitor 8 Android wrapper (packages the Angular app as an APK)
+- **prohub-ios**: Capacitor 8 iOS wrapper (packages the Angular app as an IPA — requires macOS to build)
 
 The system connects users who post jobs with professionals (pros) who offer services, featuring authentication, verification, job bidding, messaging, and payment integration (Razorpay).
 
@@ -167,11 +168,45 @@ npm run cap:open           # Opens android/ in Android Studio
 - `android/app/src/main/java/com/yprohub/android/MainActivity.java` — empty BridgeActivity shell
 - `android/app/src/main/AndroidManifest.xml` — INTERNET permission, cleartext traffic allowed (dev)
 
+## iOS (prohub-ios)
+
+### Technology Stack
+- **Type**: Capacitor 8 hybrid app — iOS WKWebView wrapper around the Angular web app
+- **App ID**: com.yprohub.ios
+- **Requires**: macOS + Xcode + CocoaPods to generate and build the native project
+
+### Architecture
+Mirrors `prohub-android` — minimal native shell, all UI/logic in the Angular web app. Unlike Android, iOS simulator can reach `localhost` directly so no API URL patching is needed.
+
+### Commands (run from prohub-ios/)
+
+```powershell
+npm install        # Install Capacitor dependencies
+
+# Sync web app into iOS project (run after any UI change)
+npm run web:sync   # Angular build → copy to www/ → cap sync
+
+# macOS only — complete native setup
+npx cap add ios    # Generate ios/ Xcode project (first time, on macOS)
+npm run cap:open   # Open in Xcode
+```
+
+> **macOS required**: `npx cap add ios` calls CocoaPods and Xcode tooling. The `ios/` native project directory must be generated on a Mac before building.
+
+### Key Files
+- `capacitor.config.json` — appId, webDir (`www/`)
+- `package.json` — build pipeline scripts
+- `ios/` — Xcode project (generated on macOS via `npx cap add ios`, not committed until then)
+
+### UI changes and the iOS app
+Same rule as Android — `www/` is a static snapshot. Run `npm run web:sync` from `prohub-ios/` after any UI changes, then rebuild in Xcode.
+
 ## Running Both Apps Locally
 
 1. **Backend**: `cd ProHubAPI/ServiceProviderAPI && dotnet watch run` — runs at `https://localhost:7042`; migrations and seed data apply automatically on startup
 2. **Frontend**: `cd prohub-ui && npm start` — runs at `http://localhost:4200`, configured to hit `http://localhost:5001/api` (update `src/environments/environment.ts` if backend port differs)
 3. **Android** (emulator): ensure backend is on port 5101, then `cd prohub-android && npm run web:sync` then open in Android Studio and run on emulator
+4. **iOS** (simulator, macOS only): `cd prohub-ios && npm run web:sync` then open in Xcode via `npm run cap:open` and run on simulator — no URL patching needed, simulator reaches `localhost` directly
 
 ## Frontend Architecture Notes
 

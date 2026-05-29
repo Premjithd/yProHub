@@ -1,3 +1,6 @@
 [submodule "prohub-android"]
 	path = prohub-android
 	url = https://github.com/Premjithd/prohub-android.git
+[submodule "prohub-ios"]
+	path = prohub-ios
+	url = https://github.com/Premjithd/prohub-ios.git
