@@ -107,7 +107,7 @@ Swagger UI: `https://localhost:7042/swagger`
 `appsettings.Development.json` overrides for local dev. Key sections in `appsettings.json`:
 ```json
 {
-  "ConnectionStrings": { "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ServiceProviderDB;..." },
+  "ConnectionStrings": { "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ProhubDB;..." },
   "Jwt": { "Key": "...", "Issuer": "https://localhost:7042", "Audience": "https://localhost:7042" },
   "Email": { "SmtpServer": "...", "Port": 587, "Username": "...", "Password": "...", "From": "..." },
   "Payment": { "Razorpay": { "KeyId": "...", "KeySecret": "..." } }
