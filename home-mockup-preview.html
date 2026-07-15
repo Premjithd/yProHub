@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>yProHub — Home elegance mockups</title>
+<style>
+  :root{
+    --color-primary:#667eea;
+    --color-primary-dark:#764ba2;
+    --color-primary-gradient:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    --color-text:#1f2937;
+    --color-text-muted:#6b7280;
+    --color-border:#e5e7eb;
+    --color-bg-light:#f9fafb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",sans-serif;
+    color:var(--color-text);
+    background:#eef0f4;
+    line-height:1.5;
+    padding:32px 16px 80px;
+  }
+  .page-title{max-width:1100px;margin:0 auto 8px;font-size:1.8rem;font-weight:700}
+  .page-sub{max-width:1100px;margin:0 auto 32px;color:var(--color-text-muted)}
+  .variant{
+    max-width:1100px;margin:0 auto 40px;background:#fff;border-radius:18px;overflow:hidden;
+    box-shadow:0 4px 24px rgba(15,23,42,.06);border:1px solid #e7e9ef;
+  }
+  .variant-label{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 22px;background:#0f172a;color:#fff;font-weight:600;font-size:.95rem;
+  }
+  .variant-label .tag{font-size:.7rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    background:rgba(255,255,255,.14);padding:3px 9px;border-radius:99px}
+  .variant-note{padding:10px 22px;font-size:.8rem;color:var(--color-text-muted);background:#f8fafc;border-bottom:1px solid #eef0f4}
+
+  /* ============ shared demo layout ============ */
+  .hero{padding:56px 32px;color:#fff}
+  .hero-grid{max-width:980px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+  .hero h1{font-size:2.1rem;line-height:1.15;margin-bottom:14px}
+  .hero p{opacity:.95;margin-bottom:26px;max-width:34ch}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{padding:12px 26px;border:none;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer;font-family:inherit;min-height:46px}
+  .btn.primary{background:#fff;color:var(--color-primary)}
+  .btn.secondary{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.7)}
+  .hero-art{aspect-ratio:4/3;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:.8rem}
+
+  .cards-wrap{padding:36px 32px 44px;background:var(--color-bg-light)}
+  .cards-grid{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .card{background:#fff;border:1.5px solid var(--color-border);border-radius:12px;padding:20px 16px;text-align:left;transition:all .15s ease;cursor:pointer}
+  .card .emoji{font-size:28px;display:block;margin-bottom:8px}
+  .card strong{display:block;font-size:1rem;margin-bottom:3px}
+  .card span{font-size:.8rem;color:var(--color-text-muted);line-height:1.4}
+  .card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.08);border-color:var(--color-primary)}
+
+  /* ============ VARIANT A : CURRENT ============ */
+  .v-current .hero{background:var(--color-primary-gradient)}
+
+  /* ============ VARIANT B : REFINED & MINIMAL ============ */
+  .v-refined .hero{
+    background:var(--color-primary-gradient);position:relative;overflow:hidden;padding:72px 32px;
+  }
+  .v-refined .hero::after{content:"";position:absolute;right:-80px;top:-80px;width:340px;height:340px;
+    background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%);pointer-events:none}
+  .v-refined .hero h1{font-size:2.4rem;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+  .v-refined .hero p{opacity:.9;line-height:1.7}
+  .v-refined .btn{border-radius:10px;transition:transform .25s ease,box-shadow .25s ease}
+  .v-refined .btn.primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.22)}
+  .v-refined .cards-wrap{padding:56px 32px}
+  .v-refined .cards-grid{gap:20px}
+  .v-refined .card{
+    border:1px solid #edf0f5;border-radius:16px;padding:26px 22px;
+    box-shadow:0 1px 2px rgba(15,23,42,.04),0 6px 16px rgba(15,23,42,.04);
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+  }
+  .v-refined .card .emoji{margin-bottom:14px}
+  .v-refined .card strong{letter-spacing:-.01em;margin-bottom:6px}
+  .v-refined .card:hover{transform:translateY(-5px);
+    box-shadow:0 16px 38px rgba(102,126,234,.16);border-color:rgba(102,126,234,.4)}
+
+  /* ============ VARIANT C : PREMIUM / GLASS ============ */
+  .v-premium .hero{
+    background:
+      radial-gradient(at 18% 20%,#7f7fff 0,transparent 45%),
+      radial-gradient(at 82% 28%,#b16cea 0,transparent 42%),
+      radial-gradient(at 50% 92%,#5a4fd6 0,transparent 55%),
+      linear-gradient(135deg,#5b6ef0,#7d4fc0);
+    padding:72px 32px;
+  }
+  .v-premium .hero h1{font-size:2.4rem;letter-spacing:-.02em}
+  .v-premium .hero-art{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25)}
+  .v-premium .cards-wrap{
+    padding:52px 32px;
+    background:linear-gradient(180deg,#f1f0fb,#f9fafb);
+  }
+  .v-premium .cards-grid{gap:18px}
+  .v-premium .card{
+    background:rgba(255,255,255,.65);backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.9);border-radius:18px;padding:24px 20px;
+    box-shadow:0 8px 30px rgba(80,70,180,.10),inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .v-premium .badge{
+    width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;margin-bottom:14px;color:#fff;
+    background:linear-gradient(135deg,#667eea,#9b6ce0);box-shadow:0 6px 16px rgba(102,126,234,.4)
+  }
+  .v-premium .card strong{letter-spacing:-.01em}
+  .v-premium .card:hover{transform:translateY(-5px);box-shadow:0 18px 44px rgba(80,70,180,.20)}
+
+  /* ============ VARIANT D : ICON SYSTEM (line icons in tinted badges) ============ */
+  .v-icons .hero{background:var(--color-primary-gradient)}
+  .v-icons .cards-wrap{padding:48px 32px}
+  .v-icons .card{border:1px solid #e8ebf1;border-radius:14px;padding:24px 20px;box-shadow:0 2px 10px rgba(15,23,42,.04)}
+  .v-icons .badge{
+    width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    margin-bottom:14px;background:rgba(102,126,234,.10);color:var(--color-primary)
+  }
+  .v-icons .badge svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .v-icons .card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(102,126,234,.14);border-color:rgba(102,126,234,.35)}
+
+  /* ============ VARIANT E : C + D (glass hero + glass cards + line-icon badges) ============ */
+  .v-combo .hero{
+    background:
+      radial-gradient(at 18% 20%,#7f7fff 0,transparent 45%),
+      radial-gradient(at 82% 28%,#b16cea 0,transparent 42%),
+      radial-gradient(at 50% 92%,#5a4fd6 0,transparent 55%),
+      linear-gradient(135deg,#5b6ef0,#7d4fc0);
+    padding:72px 32px;
+  }
+  .v-combo .hero h1{font-size:2.4rem;letter-spacing:-.02em;line-height:1.1}
+  .v-combo .hero p{opacity:.92;line-height:1.7}
+  .v-combo .hero-art{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25)}
+  .v-combo .btn{border-radius:10px;transition:transform .25s ease,box-shadow .25s ease}
+  .v-combo .btn.primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.22)}
+  .v-combo .cards-wrap{padding:52px 32px;background:linear-gradient(180deg,#f1f0fb,#f9fafb)}
+  .v-combo .cards-grid{gap:18px}
+  .v-combo .card{
+    background:rgba(255,255,255,.65);backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.9);border-radius:18px;padding:24px 20px;
+    box-shadow:0 8px 30px rgba(80,70,180,.10),inset 0 1px 0 rgba(255,255,255,.6);
+    transition:transform .25s ease,box-shadow .25s ease;
+  }
+  /* line-icon badge from D, but with the gradient fill from C */
+  .v-combo .badge{
+    width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    margin-bottom:14px;color:#fff;
+    background:linear-gradient(135deg,#667eea,#9b6ce0);box-shadow:0 6px 16px rgba(102,126,234,.4)
+  }
+  .v-combo .badge svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .v-combo .card strong{letter-spacing:-.01em}
+  .v-combo .card:hover{transform:translateY(-5px);box-shadow:0 18px 44px rgba(80,70,180,.20)}
+
+  /* ============ VARIANT F : B + C + D (mesh hero + refined SOLID cards + gradient line-icon badges) ============ */
+  /* The recommended all-device build: no backdrop-filter anywhere. */
+  .v-best .hero{
+    background:
+      radial-gradient(at 18% 20%,#7f7fff 0,transparent 45%),
+      radial-gradient(at 82% 28%,#b16cea 0,transparent 42%),
+      radial-gradient(at 50% 92%,#5a4fd6 0,transparent 55%),
+      linear-gradient(135deg,#5b6ef0,#7d4fc0);
+    padding:72px 32px;position:relative;overflow:hidden;
+  }
+  .v-best .hero::after{content:"";position:absolute;right:-80px;top:-80px;width:340px;height:340px;
+    background:radial-gradient(circle,rgba(255,255,255,.20),transparent 70%);pointer-events:none}
+  .v-best .hero h1{font-size:2.4rem;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+  .v-best .hero p{opacity:.9;line-height:1.7}
+  .v-best .hero-art{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28)}
+  .v-best .btn{border-radius:10px;transition:transform .25s ease,box-shadow .25s ease}
+  .v-best .btn.primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.22)}
+  .v-best .cards-wrap{padding:56px 32px;background:linear-gradient(180deg,#f3f2fb,#f9fafb)}
+  .v-best .cards-grid{gap:20px}
+  /* refined SOLID card from B — opaque, no blur, renders identically on web / Android WebView / iOS WKWebView */
+  .v-best .card{
+    background:#fff;border:1px solid #edf0f5;border-radius:16px;padding:26px 22px;
+    box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 22px rgba(80,70,180,.07);
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+  }
+  /* gradient badge from C, holding the line icon from D */
+  .v-best .badge{
+    width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;color:#fff;
+    background:linear-gradient(135deg,#667eea,#9b6ce0);box-shadow:0 6px 16px rgba(102,126,234,.38)
+  }
+  .v-best .badge svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .v-best .card strong{letter-spacing:-.01em;margin-bottom:6px}
+  .v-best .card:hover{transform:translateY(-5px);
+    box-shadow:0 18px 40px rgba(102,126,234,.18);border-color:rgba(102,126,234,.4)}
+
+  @media(max-width:760px){
+    .hero-grid{grid-template-columns:1fr;gap:28px}
+    .cards-grid{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+
+  <h1 class="page-title">yProHub — Home page elegance options</h1>
+  <p class="page-sub">Same hero + quick-action cards, four treatments. Hover the cards to feel the interaction differences.</p>
+
+  <!-- ===== A. CURRENT ===== -->
+  <div class="variant v-current">
+    <div class="variant-label"><span class="tag">A</span> Current design</div>
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Find trusted pros for any job</h1>
+          <p>Post a job, compare bids, and hire verified professionals near you.</p>
+          <div class="hero-cta">
+            <button class="btn primary">Join as User</button>
+            <button class="btn secondary">Become a Pro</button>
+          </div>
+        </div>
+        <div class="hero-art">hero image</div>
+      </div>
+    </div>
+    <div class="cards-wrap">
+      <div class="cards-grid">
+        <div class="card"><span class="emoji">📋</span><strong>Post a Job</strong><span>Describe what you need done</span></div>
+        <div class="card"><span class="emoji">📁</span><strong>My Jobs</strong><span>Track your posted jobs</span></div>
+        <div class="card"><span class="emoji">💬</span><strong>Messages</strong><span>Chat with pros</span></div>
+        <div class="card"><span class="emoji">🔍</span><strong>Browse Pros</strong><span>Find verified professionals</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== B. REFINED & MINIMAL ===== -->
+  <div class="variant v-refined">
+    <div class="variant-label"><span class="tag">B</span> Refined &amp; minimal</div>
+    <div class="variant-note">Brand kept. Added: radial glow behind hero, tighter heading tracking, 1px borders + 16px radius, layered soft shadows, calmer 250ms lift with brand-tinted glow, more whitespace.</div>
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Find trusted pros for any job</h1>
+          <p>Post a job, compare bids, and hire verified professionals near you.</p>
+          <div class="hero-cta">
+            <button class="btn primary">Join as User</button>
+            <button class="btn secondary">Become a Pro</button>
+          </div>
+        </div>
+        <div class="hero-art">hero image</div>
+      </div>
+    </div>
+    <div class="cards-wrap">
+      <div class="cards-grid">
+        <div class="card"><span class="emoji">📋</span><strong>Post a Job</strong><span>Describe what you need done</span></div>
+        <div class="card"><span class="emoji">📁</span><strong>My Jobs</strong><span>Track your posted jobs</span></div>
+        <div class="card"><span class="emoji">💬</span><strong>Messages</strong><span>Chat with pros</span></div>
+        <div class="card"><span class="emoji">🔍</span><strong>Browse Pros</strong><span>Find verified professionals</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== C. PREMIUM / GLASS ===== -->
+  <div class="variant v-premium">
+    <div class="variant-label"><span class="tag">C</span> Premium / glassmorphism</div>
+    <div class="variant-note">Mesh-gradient hero, frosted glass cards with backdrop-blur, gradient icon badges. Most dramatic — modern SaaS look. (backdrop-filter needs a recent browser.)</div>
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Find trusted pros for any job</h1>
+          <p>Post a job, compare bids, and hire verified professionals near you.</p>
+          <div class="hero-cta">
+            <button class="btn primary">Join as User</button>
+            <button class="btn secondary">Become a Pro</button>
+          </div>
+        </div>
+        <div class="hero-art">hero image</div>
+      </div>
+    </div>
+    <div class="cards-wrap">
+      <div class="cards-grid">
+        <div class="card"><span class="badge">📋</span><strong>Post a Job</strong><span>Describe what you need done</span></div>
+        <div class="card"><span class="badge">📁</span><strong>My Jobs</strong><span>Track your posted jobs</span></div>
+        <div class="card"><span class="badge">💬</span><strong>Messages</strong><span>Chat with pros</span></div>
+        <div class="card"><span class="badge">🔍</span><strong>Browse Pros</strong><span>Find verified professionals</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== D. ICON SYSTEM ===== -->
+  <div class="variant v-icons">
+    <div class="variant-label"><span class="tag">D</span> Icon system upgrade</div>
+    <div class="variant-note">Emoji replaced with consistent line icons in tinted square badges. Highest "looks professional" payoff; combine with B or C.</div>
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Find trusted pros for any job</h1>
+          <p>Post a job, compare bids, and hire verified professionals near you.</p>
+          <div class="hero-cta">
+            <button class="btn primary">Join as User</button>
+            <button class="btn secondary">Become a Pro</button>
+          </div>
+        </div>
+        <div class="hero-art">hero image</div>
+      </div>
+    </div>
+    <div class="cards-wrap">
+      <div class="cards-grid">
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg></span>
+          <strong>Post a Job</strong><span>Describe what you need done</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+          <strong>My Jobs</strong><span>Track your posted jobs</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg></span>
+          <strong>Messages</strong><span>Chat with pros</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <strong>Browse Pros</strong><span>Find verified professionals</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== E. C + D COMBINED ===== -->
+  <div class="variant v-combo">
+    <div class="variant-label"><span class="tag">E</span> C + D combined — premium glass + line icons</div>
+    <div class="variant-note">Mesh-gradient hero and frosted glass cards from C, with the consistent line icons from D sitting inside gradient badges. The most polished of the set. (backdrop-filter needs a recent browser.)</div>
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Find trusted pros for any job</h1>
+          <p>Post a job, compare bids, and hire verified professionals near you.</p>
+          <div class="hero-cta">
+            <button class="btn primary">Join as User</button>
+            <button class="btn secondary">Become a Pro</button>
+          </div>
+        </div>
+        <div class="hero-art">hero image</div>
+      </div>
+    </div>
+    <div class="cards-wrap">
+      <div class="cards-grid">
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg></span>
+          <strong>Post a Job</strong><span>Describe what you need done</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+          <strong>My Jobs</strong><span>Track your posted jobs</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg></span>
+          <strong>Messages</strong><span>Chat with pros</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <strong>Browse Pros</strong><span>Find verified professionals</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== F. B + C + D — RECOMMENDED ALL-DEVICE BUILD ===== -->
+  <div class="variant v-best">
+    <div class="variant-label"><span class="tag">F ★</span> B + C + D — recommended for web + Android + iOS</div>
+    <div class="variant-note">Mesh-gradient hero + refined typography/whitespace (B), gradient icon badges (C), consistent line icons (D). <strong>No backdrop-filter, no emoji</strong> — renders pixel-identical on web, Android WebView, and iOS WKWebView.</div>
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Find trusted pros for any job</h1>
+          <p>Post a job, compare bids, and hire verified professionals near you.</p>
+          <div class="hero-cta">
+            <button class="btn primary">Join as User</button>
+            <button class="btn secondary">Become a Pro</button>
+          </div>
+        </div>
+        <div class="hero-art">hero image</div>
+      </div>
+    </div>
+    <div class="cards-wrap">
+      <div class="cards-grid">
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg></span>
+          <strong>Post a Job</strong><span>Describe what you need done</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+          <strong>My Jobs</strong><span>Track your posted jobs</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg></span>
+          <strong>Messages</strong><span>Chat with pros</span>
+        </div>
+        <div class="card">
+          <span class="badge"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <strong>Browse Pros</strong><span>Find verified professionals</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
