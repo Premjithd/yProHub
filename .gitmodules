@@ -7,3 +7,6 @@
 [submodule "prohub-ios"]
 	path = prohub-ios
 	url = https://github.com/Premjithd/prohub-ios.git
+[submodule "prohub-ui"]
+	path = prohub-ui
+	url = https://github.com/Premjithd/prohub-ui.git
