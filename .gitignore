@@ -44,3 +44,7 @@ logs/
 *.tmp
 *.temp
 *.bak
+
+# Generated ownership/planning decks (local artifacts, not source)
+yProHub-Ownership-Deck.html
+yProHub-Ownership-Deck.pdf
