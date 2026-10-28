@@ -218,6 +218,12 @@ Same rule as Android — `www/` is a static snapshot. Run `npm run web:sync` fro
 
 **Angular build budget**: `anyComponentStyle.maximumError` is set to `30kB` in `angular.json` (raised from default 20kB due to large detail-page stylesheets).
 
+**Services browse search** (`features/services/services`): the search box filters on a **text query** plus an optional **PIN area** filter. Both are wired to `GET /api/services` (`BrowseServicesService`):
+- `search` — tokenized on whitespace; a service matches if **any** term appears (OR semantics) as a **substring** in name/description/business name/pro name. So "plumb paint" matches both *Plumbing* and *Painting*, and partial words work ("plumb" → "plumber"). Implemented in `ServicesController.GetServices`.
+- `pin` — exact match against the pro's `Address.ZipPostalCode`, layered on top of the text search to scope results to an area. (This is the pro's own postal code, not the admin `ServiceArea` reference table — there is no pro↔ServiceArea coverage link.)
+- The home "Get Quotes" box always routes to `/services?search=&pin=` (for both logged-in and logged-out users); the services page reads those query params on load and applies the filter. Opening a service from the browse list requires login (redirects to `/auth/login?returnUrl=`).
+- The sidebar "Services" link and the "What do you need help with?" category section are hidden for pros / hidden outright respectively — categories still load so deep-links (`?category=`) keep working.
+
 ## Important Notes
 
 - **CORS**: Dev allows any origin (`AllowAnyOrigin()`). Restrict in production.
