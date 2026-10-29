@@ -92,6 +92,13 @@ Swagger UI: `https://localhost:7042/swagger`
 
 **Messaging**: `MessageIndex` tracks user-pair conversations; `Message` entities link to index.
 
+**Email branding**: All outbound emails share one branded HTML shell built by `EmailTemplates` (`Services/EmailTemplates.cs`):
+- `Wrap(innerHtml, tagline?)` renders the shell — centered yProHub logo header, a tagline line (defaults to "This is an official message from yProHub."), the inner content, and an automated-message/copyright footer.
+- The **logo is embedded inline via a `cid:` content-id** (`BuildBrandedView` attaches `EmailAssets/logo-512.png` as a `LinkedResource`, `ContentId = "yprohub-logo"`), not referenced by URL — so it renders without depending on a publicly reachable image or the client un-blocking remote images. The `.csproj` copies `EmailAssets/**` to the build output (`AppContext.BaseDirectory/EmailAssets`); `BuildBrandedView` guards with `File.Exists`, so a missing asset degrades gracefully (email still sends, no logo).
+- `TextToHtml(text)` converts plain-text notification bodies (escape + `nl2br`) for the shell.
+- **Senders all route through the shell**: `SmtpEmailService.SendEmailAsync` (admin invite, team invite, and every `NotifyAsync` via `SmtpEmailChannel`) wraps the body in `BuildBrandedView`; `VerificationService` uses its own `SmtpClient` but the same `EmailTemplates` helper. So verification, password reset, admin/team invites, and all job notifications are consistently branded. Transactional emails with an action link (reset, team/admin invite) use a styled button (`#1d4ed8`) plus a copy-paste fallback URL; pass HTML (not plain text) to `SendEmailAsync` to get a real button rather than an escaped link.
+- **SMS** can't carry a logo — branding there is just a `yProHub:` text prefix (see `NotificationService.BuildSmsText` and `VerificationService.SendVerificationSms`) plus the DLT-registered 6-char sender ID (`SMS:MSG91:SenderId`, e.g. `PROHUB`).
+
 **Auth / Logout**: JWT tokens include a `jti` (JWT ID) claim. On logout, the `jti` is written to the `RevokedTokens` table (`ITokenBlacklistService`). An `OnTokenValidated` hook in `Program.cs` rejects any request whose token `jti` is in that table. The Angular `Auth.logoutOnServer()` calls `POST /api/auth/logout` before clearing localStorage — the client-side clear always happens even if the server call fails.
 
 **Migrations**: Auto-applied on startup via `context.Database.MigrateAsync()`. Key migrations: `InitialCreate`, `AddUserTypeAndVerificationCodes`, `AddJobTable`, `AddAddressFieldsToUser/Pro`, `AddServiceCategoryTable`, `AddRevokedTokens`.
