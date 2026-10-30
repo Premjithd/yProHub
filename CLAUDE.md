@@ -121,6 +121,43 @@ Swagger UI: `https://localhost:7042/swagger`
 }
 ```
 
+## Payment Split & GST (India) — model + decision notes
+
+How a job's money is split between **user (consumer)**, **pro (professional)**, and **platform**. Computed in `Services/RateSplitService.cs` (`CalculateSplitAsync` for the full bid; `ProrateForPrincipal` scales a full split down to a partial payment so a series of partials sums exactly to the full). Surfaced on `POST /api/payments/create-order` and persisted on the `Payment` row (`PlatformFee`, `ProPayout`).
+
+### Current model (facilitation / two-sided commission)
+The platform takes a cut from **both** sides of the agreed bid:
+- **User pays** = bid + user commission + GST on that commission  → ~111.8% of bid at defaults
+- **Pro receives** = bid − pro commission − GST on pro commission  → ~88.2% of bid at defaults
+- **Platform earns** = user commission + pro commission (the GST is a pass-through to the government, not platform profit)
+
+Config lives in the `AppSettings` table (admin-editable via `GET/PUT /api/admin/commission-config`); defaults in `RateSplitService.Defaults`:
+
+| Key | Default | Meaning |
+|---|---|---|
+| `commission.user_percent` | 10 | user-side commission % (added on top of bid) |
+| `commission.pro_percent` | 10 | pro-side commission % (deducted from payout) |
+| `commission.gst_percent` | 18 | GST rate applied to commission(s) |
+| `commission.min_fee` | 10 | floor (₹) on the user commission |
+| `commission.max_percent` | 20 | cap (% of bid) on the user commission |
+| `commission.pro_gst_applies` | 1 | **charge GST on the pro-side commission** (1=on, 0=off) |
+
+Worked example (bid ₹1,500, defaults, pro GST on): user pays **₹1,677**, pro payout **₹1,323**, platform net commission **₹300**, GST remitted **₹54** (₹27 user-side + ₹27 pro-side). Admin UI: commission-config card in `admin-users` has a live preview + a "Charge GST on Pro Commission" toggle (button-toggle with `(click)`, not a native checkbox with `[(ngModel)]` — the app is zoneless and checkbox two-way binding doesn't reflect reliably).
+
+### Why GST on the pro commission (decision)
+The platform's commission is its **own taxable supply of service to the pro** (listing/lead-gen/payment handling), so 18% GST applies to it — separately from, and in addition to, any GST on the underlying job. This is a **distinct supply** from the job itself, so it holds in **both** GST regimes below. Precedent: a Swiggy/Zomato payout carries **5% GST (§9(5)) on the food value + 18% GST on the platform commission** simultaneously. Hence `pro_gst_applies` defaults **on**. Caveat: if the pro is **unregistered** (common under §9(5), see below), they **cannot claim ITC** on that commission GST, so it becomes a real cost that lowers their take-home.
+
+### Open tax question — which GST regime applies (CONFIRM WITH A CA before launch)
+yProHub's categories (plumbing, carpentry, painting, cleaning) are **"housekeeping"**, which is a **§9(5) notified service**. Two mutually-relevant regimes:
+
+- **Model A — facilitation / marketplace** (what the code implements today): the **pro** is the supplier and handles GST on the job; the platform only charges **commission + 18% GST**, and additionally must collect **§52 TCS @ 0.5%** (reduced from 1% on 2024-07-10) on net supply value, filed in GSTR-8. *TCS is NOT modeled in code yet.*
+- **Model B — §9(5) deemed supplier** (likely applies to home services): the **platform is treated as the supplier** and **pays GST on the full job value** to the government in **cash (no ITC)**; the **pro is exempt from GST registration even above the threshold**; **no §52 TCS**. The commission + 18% GST (Model A's pro-commission line) **still applies on top** as a separate supply.
+
+So the pro-commission GST feature is correct in both; the **unresolved item** is whether the platform additionally owes **§9(5) GST on the full job value**. If so, `RateSplitService` needs a config-gated `gstMode` (`facilitation` | `deemed_supplier_9_5`) adding a platform full-value GST line. Also confirm with the CA: (a) the exact **GST rate per service category** (home-repair generally 18%; some §9(5) categories are 5% without ITC), and (b) whether both the §9(5) full-value GST and the commission GST co-apply.
+
+### Market benchmark
+Indian service marketplaces take **~15–35%**. Urban Company's all-in take is **~28%** of the pro's gross (commission + fees); customer pays service + convenience fee + GST; pro is paid after the customer rates the job. yProHub's default **20%** gross take (10% + 10%) is on the lower end.
+
 ## Android (prohub-android)
 
 ### Technology Stack
