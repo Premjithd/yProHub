@@ -117,9 +117,19 @@ Swagger UI: `https://localhost:7042/swagger`
   "ConnectionStrings": { "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ProhubDB;..." },
   "Jwt": { "Key": "...", "Issuer": "https://localhost:7042", "Audience": "https://localhost:7042" },
   "Email": { "SmtpServer": "...", "Port": 587, "Username": "...", "Password": "...", "From": "..." },
-  "Payment": { "Razorpay": { "KeyId": "...", "KeySecret": "..." } }
+  "Payment": { "Razorpay": { "KeyId": "...", "KeySecret": "..." } },
+  "Encryption": { "Key": "" }
 }
 ```
+
+### Local environment & secrets
+
+- **Dev database is `ProhubDB_Test`**, not `ProhubDB`. `appsettings.Development.json` overrides the connection string to `Server=(localdb)\mssqllocaldb;Database=ProhubDB_Test`, so the app you run under the Development profile (and the Playwright E2E suite) uses `ProhubDB_Test`. `ProhubDB` is only used outside Development (base `appsettings.json`). When inspecting data locally, query **`ProhubDB_Test`**.
+- **Migrations auto-apply on startup** (`Database.MigrateAsync()`), so a fresh `dotnet run` brings the Development DB current. To target a specific DB with the CLI, pass `--connection` (e.g. apply to `ProhubDB`: `dotnet ef database update --connection "Server=(localdb)\mssqllocaldb;Database=ProhubDB;Trusted_Connection=True;MultipleActiveResultSets=true"`).
+- **At-rest field encryption** — the Pro/Business payout columns on `PaymentMethod` (`BankAccountNumber`, `BankIfsc`, `BankAccountHolderName`, `UpiVpa`) are encrypted at rest with AES-256-GCM (`Data/FieldEncryption.cs`). The key is read from the **`PROHUB_ENCRYPTION_KEY`** environment variable first, falling back to `Encryption:Key` in config. **No key → encryption is a no-op** (plaintext), so tests/un-provisioned envs still run. Ciphertext is tagged `enc:v1:`; values without the tag are treated as legacy plaintext (no backfill needed — re-encrypted on next write).
+  - Generate a key (base64 of 32 bytes): PowerShell `$b = New-Object byte[] 32; [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)` — or `openssl rand -base64 32`.
+  - Set it locally: `setx PROHUB_ENCRYPTION_KEY "<base64>"` (persists to the user environment; open a **new** terminal to pick it up). Production: set `PROHUB_ENCRYPTION_KEY` in the host/secrets manager.
+  - **Keep the key stable and backed up** — losing/rotating it makes existing encrypted payout rows unrecoverable.
 
 ## Payment Split & GST (India) — model + decision notes
 
@@ -276,4 +286,6 @@ Same rule as Android — `www/` is a static snapshot. Run `npm run web:sync` fro
 - **Email/SMS**: Console-only in dev; configure SMTP/Msg91 for production.
 - **Address autofill**: Uses Nominatim (OpenStreetMap) via backend proxy. See `ADDRESS_AUTOFILL_GUIDE.md` for details.
 - **Razorpay**: Test keys in `appsettings.Development.json`; swap for live keys in production.
+- **At-rest encryption**: Payout bank columns are AES-256-GCM encrypted via `PROHUB_ENCRYPTION_KEY` (see *Local environment & secrets* above). No key = plaintext (no-op). Keep the key stable/backed up.
+- **Local DB**: Development uses `ProhubDB_Test` (not `ProhubDB`) — see *Local environment & secrets*.
 - **Brand name**: Always "yProHub" (lowercase 'y'). The `y` prefix is intentional — never write "ProHub" or "YProHub".
